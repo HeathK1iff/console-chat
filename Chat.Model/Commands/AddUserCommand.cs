@@ -10,7 +10,7 @@ namespace Chat.Model.Commands
 {
     public class AddUserCommand : BaseCommand
     {
-        static string CommandPattern = @"^(\w+)=((?:[0-9]{1,3}\.){3}[0-9]{1,3})$";
+        static string CommandPattern = @"^(\w+)=((?:[0-9]{1,3}\.){3}[0-9]{1,3})(:\d+)?$";
         public AddUserCommand(Dictionary<EndPoint, string> users, IChatMessageSender sender) : base(users, sender)
         {
         }
@@ -20,9 +20,13 @@ namespace Chat.Model.Commands
             return Regex.IsMatch(command, AddUserCommand.CommandPattern);
         }
 
-        private bool Split(string command, out IPAddress ip, out string userName)
+        private bool Split(string command, out IPAddress ip, out string userName, out int port)
         {
+            if (string.IsNullOrEmpty(command))
+                throw new ArgumentNullException("Command can be null/empty");
+
             ip = null;
+            port = 8090;
             userName = string.Empty;
 
             var match = Regex.Match(command, AddUserCommand.CommandPattern);
@@ -33,16 +37,27 @@ namespace Chat.Model.Commands
                 throw new InvalidParceIPAddressException();
 
             userName = match.Groups[1].Value;
+
+            if (!string.IsNullOrEmpty(match.Groups[3].Value.Trim()))
+            {
+                port = int.Parse(match.Groups[3].Value.Substring(1));
+                if ((port < 1000) || (port > 65536))
+                    throw new ArgumentOutOfRangeException($"Port should be between 1000 and 65536");
+            }
             
             return true;
         }
 
         public override async Task ExecuteAsync(string command)
         {
-            if (!Split(command, out IPAddress ip, out string userName))
-                throw new ArgumentException();
+            Split(command, out IPAddress ip, out string userName, out int port);
+            
+            var endPoint = new IPEndPoint(ip, port);
 
-            _users.Add(new IPEndPoint(ip, 8090), userName);
+            if (_users.ContainsKey(endPoint))
+                return;
+
+           _users.Add(new IPEndPoint(ip, port), userName);   
         }
     }
 }

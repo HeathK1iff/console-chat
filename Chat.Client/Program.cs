@@ -7,8 +7,7 @@ namespace Chat.Console
         static void Main()
         {
             new Chat.Model.Chat(new UserConsoleProvider(), 
-                new SocketDeliveryMessageFactory(new GetIPAddressByHostProvider(), 8090),
-                8090).Run();         
+                new SocketDeliveryMessageFactory(new GetIPAddressByHostProvider(), 8090)).Run();         
         }
     }
 }

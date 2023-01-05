@@ -16,16 +16,13 @@ namespace Chat.Model
         Dictionary<EndPoint, string> _users;
         IUserCommandProvider _userCommandProvider;
         IDeliveryMessageFactory _deliveryMessageFactor;
-        int _listenerPort;
 
         public Chat(IUserCommandProvider userCommandProvider,
-            IDeliveryMessageFactory deliveryMessageFactor, 
-            int port)
+            IDeliveryMessageFactory deliveryMessageFactor)
         {
             _deliveryMessageFactor = deliveryMessageFactor;
             _userCommandProvider = userCommandProvider;
             _users = new Dictionary<EndPoint, string>();
-            _listenerPort = port;
         }
 
         private void ReceiveMessages(ConcurrentQueue<ChatMessage> messages)

@@ -1,6 +1,7 @@
 ﻿using Chat.Model.Net;
 using System.Collections.Generic;
 using System.Net;
+using System;
 using System.Threading.Tasks;
 
 namespace Chat.Model.Commands
@@ -12,7 +13,13 @@ namespace Chat.Model.Commands
 
         public BaseCommand(Dictionary<EndPoint, string> users, IChatMessageSender sender)
         {
-            _users = users;
+            if (users is null)
+                throw new ArgumentNullException("Users can not be null");
+
+            if (sender is null)
+                throw new ArgumentNullException("Sender can not be null");
+
+             _users = users;
             _sender = sender;
         }
 
